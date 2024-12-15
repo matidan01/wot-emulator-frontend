@@ -22,7 +22,7 @@ const ThingsList = () => {
                     console.log('Changes:', changes);
                 })
                 .catch(error => console.error('Error fetching changes:', error));
-        }, 2000);
+        }, 1000);
 
         return () => clearInterval(interval);
     }, []);
