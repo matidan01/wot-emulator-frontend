@@ -1,30 +1,24 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
+import socket from '../connection/socket'; 
 
 const ThingsList = () => {
     const [things, setThings] = useState<any[]>([]);
 
     useEffect(() => {
-        fetch('http://localhost:3000/api/things')
-            .then(response => response.json())
-            .then(data => {
-                setThings(data);
-                console.log('Initial data:', data);
-            })
-            .catch(error => console.error('Error fetching things:', error));
-    }, []);
+        socket.on("setup", (data) => {
+            setThings(data);
+            console.log("Data received from server:", data);
+        });
 
-    useEffect(() => {
-        const interval = setInterval(() => {
-            fetch('http://localhost:3000/api/changes')
-                .then(response => response.json())
-                .then(changes => {
-                    updateThings(changes);
-                    console.log('Changes:', changes);
-                })
-                .catch(error => console.error('Error fetching changes:', error));
-        }, 1000);
+        socket.on("update", (data) => {
+            updateThings(data);
+            console.log("Data received from server:", data);
+        });
 
-        return () => clearInterval(interval);
+        return () => {
+            socket.off("setup");
+            socket.off("update");
+        };
     }, []);
 
     const updateThings = (changes: any[]) => {
@@ -53,7 +47,7 @@ const ThingsList = () => {
                                 <div className="card-text">
                                     {Object.entries(thing).map(([key, value]) => (
                                         key !== 'title' && key !== 'type' && (
-                                            <p key={key} className="mb-1"><strong>{key}:</strong>{String(value)}</p>
+                                            <p key={key} className="mb-1"><strong>{key}:</strong> {String(value)}</p>
                                         )
                                     ))}
                                 </div>
