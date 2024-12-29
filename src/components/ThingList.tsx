@@ -5,33 +5,39 @@ const ThingsList = () => {
     const [things, setThings] = useState<any[]>([]);
 
     useEffect(() => {
+
         socket.on("setup", (data) => {
             setThings(data);
             console.log("Data received from server:", data);
         });
 
         socket.on("update", (data) => {
-            updateThings(data);
+            setThings(prevThings => updateThings(data, prevThings));
             console.log("Data received from server:", data);
+        });
+
+        // Listen for "serverStopped" to refresh the page
+        socket.on("serverStopped", () => {
+            console.log("Server stopped. Refreshing the page...");
+            window.location.reload(); // Refreshes the page
         });
 
         return () => {
             socket.off("setup");
             socket.off("update");
+            socket.off("serverStopped");
         };
     }, []);
 
-    const updateThings = (changes: any[]) => {
-        setThings(prevThings => {
-            const updatedThings = prevThings.map(thing => {
-                const change = changes.find(c => c.title === thing.title);
-                if (change) {
-                    return { ...thing, ...change }; 
-                }
-                return thing; 
-            });
-            return updatedThings;
+    const updateThings = (changes: any[], prevThings: any[]) => {
+        const updatedThings = prevThings.map(thing => {
+            const change = changes.find(c => c.title === thing.title);
+            if (change) {
+                return { ...thing, ...change }; 
+            }
+            return thing; 
         });
+        return updatedThings;
     };
 
     return (
