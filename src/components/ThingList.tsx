@@ -2,15 +2,18 @@ import { useEffect, useState } from 'react';
 import socket from '../connection/socket'; 
 
 const ThingsList = () => {
+    // State to store the list of "things" received from the server.
     const [things, setThings] = useState<any[]>([]);
 
     useEffect(() => {
 
+        // Set up a listener for the "setup" event from the server.
         socket.on("setup", (data) => {
             setThings(data);
             console.log("Data received from server:", data);
         });
 
+        // Set up a listener for the "update" event to handle incremental updates.
         socket.on("update", (data) => {
             setThings(prevThings => updateThings(data, prevThings));
             console.log("Data received from server:", data);
@@ -22,6 +25,7 @@ const ThingsList = () => {
             window.location.reload(); // Refreshes the page
         });
 
+        // Cleanup: Remove all socket listeners when the component unmounts.
         return () => {
             socket.off("setup");
             socket.off("update");
@@ -29,6 +33,7 @@ const ThingsList = () => {
         };
     }, []);
 
+    // Function to update the list of "things" with changes received from the server.
     const updateThings = (changes: any[], prevThings: any[]) => {
         const updatedThings = prevThings.map(thing => {
             const change = changes.find(c => c.title === thing.title);

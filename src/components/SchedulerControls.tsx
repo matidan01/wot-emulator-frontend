@@ -1,7 +1,9 @@
 import React from 'react';
 import socket from '../connection/socket'; 
 
+// Define a React functional component for scheduler controls.
 const SchedulerControls: React.FC = () => {
+    // Function to send a command to the server using the socket connection.
     const sendCommand = (command: string) => {
         socket.emit('schedulerCommand', { command });
         console.log(`Sent: ${command}`);
