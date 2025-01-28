@@ -1,6 +1,21 @@
 import { useEffect, useState } from 'react';
 import socket from '../connection/socket'; 
 
+function parsedData(data : any[]) {
+    const parsedData = [];
+    for (const thing of data) {
+        if (thing.rooms != undefined) {
+            parsedData.push(thing);
+            for (const room of thing.rooms) {
+                parsedData.push(room);
+            }
+        } else {
+            parsedData.push(thing);
+        }
+    }
+    return parsedData;
+}
+
 const ThingsList = () => {
     // State to store the list of "things" received from the server.
     const [things, setThings] = useState<any[]>([]);
@@ -9,14 +24,14 @@ const ThingsList = () => {
 
         // Set up a listener for the "setup" event from the server.
         socket.on("setup", (data) => {
-            setThings(data);
-            console.log("Data received from server:", data);
+            console.log(data);
+            setThings(parsedData(data));
         });
 
         // Set up a listener for the "update" event to handle incremental updates.
         socket.on("update", (data) => {
-            setThings(prevThings => updateThings(data, prevThings));
-            console.log("Data received from server:", data);
+            setThings(prevThings => updateThings(parsedData(data), parsedData(prevThings)));
+            console.log("Data received from server:", parsedData(data));
         });
 
         // Listen for "serverStopped" to refresh the page
