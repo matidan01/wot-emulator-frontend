@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react';
 import socket from '../connection/socket'; 
 
+// Function to parse data received from the server
 function parsedData(data : any[]) {
     const parsedData = [];
     for (const thing of data) {
+        // If the thing has rooms, include both the thing and its rooms in the parsed data
         if (thing.rooms != undefined) {
             parsedData.push(thing);
             for (const room of thing.rooms) {
@@ -30,7 +32,7 @@ const ThingsList = () => {
 
         // Set up a listener for the "update" event to handle incremental updates.
         socket.on("update", (data) => {
-            setThings(prevThings => updateThings(parsedData(data), parsedData(prevThings)));
+            setThings(prevThings => updateThings(parsedData(data), prevThings));
             console.log("Data received from server:", parsedData(data));
         });
 
